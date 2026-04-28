@@ -1,67 +1,42 @@
-import java.util.*;
+Given two strings s1 and s2, we want to visualize how different the two strings are. We will only take into account the lowercase letters (a to z). First let us count the frequency of each lowercase letters in s1 and s2.
 
-class Mixing {
+s1 = "A aaaa bb c"
 
-    static Map<Character, Integer> countFrequencies(String s) {
-        Map<Character, Integer> freq = new HashMap<>();
-        for (int i=0; i<s.length(); i++) {
-            char c = s.charAt(i);
-            if (!Character.isLowerCase(c))
-                continue;
-            Integer cnt = freq.getOrDefault(c, 0);
-            freq.put(c, cnt+1);
-        }
-        for (Iterator<Map.Entry<Character, Integer>> it = freq.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry<Character, Integer> entry = it.next();
-            if (entry.getValue() < 2) {
-                it.remove();
-            }
-        }
-        return freq;
-    }
+s2 = "& aaa bbb c d"
 
-    public static String mix(String s1, String s2) {
-        Map<Character, Integer> s1Freq = countFrequencies(s1);
-        System.out.println(s1Freq);
+s1 has 4 'a', 2 'b', 1 'c'
 
-        Map<Character, Integer> s2Freq = countFrequencies(s2);
-        System.out.println(s2Freq);
+s2 has 3 'a', 3 'b', 1 'c', 1 'd'
 
-        Set<Character> resKeySet = new TreeSet<> (s1Freq.keySet());
-        resKeySet.addAll(s2Freq.keySet());
+So the maximum for 'a' in s1 and s2 is 4 from s1; the maximum for 'b' is 3 from s2. In the following we will not consider letters when the maximum of their occurrences is less than or equal to 1.
 
-        List<String> res = new ArrayList<>(resKeySet.size());
+We can resume the differences between s1 and s2 in the following string: "1:aaaa/2:bbb" where 1 in 1:aaaa stands for string s1 and aaaa because the maximum for a is 4. In the same manner 2:bbb stands for string s2 and bbb because the maximum for b is 3.
 
-        for (Character c : resKeySet) {
-            StringBuilder item = new StringBuilder();
-            Integer f1 = s1Freq.getOrDefault(c, 0);
-            Integer f2 = s2Freq.getOrDefault(c, 0);
+The task is to produce a string in which each lowercase letters of s1 or s2 appears as many times as its maximum if this maximum is strictly greater than 1; these letters will be prefixed by the number of the string where they appear with their maximum value and :. If the maximum is in s1 as well as in s2 the prefix is =:.
 
-            if (f1.compareTo(f2) == 0) {
-                char[] chars = new char[f1];
-                Arrays.fill(chars, c);
-                item.append("=:").append(chars);
-            }
-            else if (f1.compareTo(f2) > 0) {
-                char[] chars = new char[f1];
-                Arrays.fill(chars, c);
-                item.append("1:").append(chars);
-            }
-            else {
-                char[] chars = new char[f2];
-                Arrays.fill(chars, c);
-                item.append("2:").append(chars);
-            }
-            res.add(item.toString());
-        }
+In the result, substrings (a substring is for example 2:nnnnn or 1:hhh; it contains the prefix) will be in decreasing order of their length and when they have the same length sorted in ascending lexicographic order (letters and digits - more precisely sorted by codepoint); the different groups will be separated by '/'. See examples and "Example Tests".
 
-        res.sort((String str1, String str2)->{
-            if(str1.length() != str2.length())
-                return str2.length() - str1.length();
-            else
-                return str1.compareTo(str2);
-        });
+Hopefully other examples can make this clearer.
 
-        return String.join("/", res);
-    }
-}
+s1 = "my&friend&Paul has heavy hats! &"
+s2 = "my friend John has many many friends &"
+mix(s1, s2) --> "2:nnnnn/1:aaaa/1:hhh/2:mmm/2:yyy/2:dd/2:ff/2:ii/2:rr/=:ee/=:ss"
+
+s1 = "mmmmm m nnnnn y&friend&Paul has heavy hats! &"
+s2 = "my frie n d Joh n has ma n y ma n y frie n ds n&"
+mix(s1, s2) --> "1:mmmmmm/=:nnnnnn/1:aaaa/1:hhh/2:yyy/2:dd/2:ff/2:ii/2:rr/=:ee/=:ss"
+
+s1="Are the kids at home? aaaaa fffff"
+s2="Yes they are here! aaaaa fffff"
+mix(s1, s2) --> "=:aaaaaa/2:eeeee/=:fffff/1:tt/2:rr/=:hh"
+
+Note for Swift, R, PowerShell
+
+The prefix =: is replaced by E:
+
+s1 = "mmmmm m nnnnn y&friend&Paul has heavy hats! &"
+s2 = "my frie n d Joh n has ma n y ma n y frie n ds n&"
+mix(s1, s2) --> "1:mmmmmm/E:nnnnnn/1:aaaa/1:hhh/2:yyy/2:dd/2:ff/2:ii/2:rr/E:ee/E:ss"
+
+Fundamentals
+Strings
